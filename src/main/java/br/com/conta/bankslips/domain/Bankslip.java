@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalField;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -33,7 +35,7 @@ public class Bankslip {
 	private final UUID serial;
 	
 	@Column(name = "due_date")
-	private final Date dueDate;
+	private final LocalDate dueDate;
 	
 	@Column(name = "total_in_cents")
 	private final BigDecimal totalInCents;
@@ -47,7 +49,7 @@ public class Bankslip {
 		this(null, null, null, null);
 	}
 
-	private Bankslip(Date dueDate, BigDecimal totalInCents, String customer, SlipStatus status) {
+	private Bankslip(LocalDate dueDate, BigDecimal totalInCents, String customer, SlipStatus status) {
 		this.serial = UUID.randomUUID();
 		this.dueDate = dueDate;
 		this.totalInCents = totalInCents;
@@ -55,7 +57,7 @@ public class Bankslip {
 		this.status = status;
 	}
 	
-	public static Bankslip of(Date dueDate, BigDecimal totalInCents, String customer, SlipStatus status) throws BankslipValidationException {
+	public static Bankslip of(LocalDate dueDate, BigDecimal totalInCents, String customer, SlipStatus status) throws BankslipValidationException {
 		try {
 			checkNotNull(dueDate, "Field due_date can not be null");
 			checkNotNull(totalInCents, "Field total_in_cents can not be null");
@@ -75,7 +77,7 @@ public class Bankslip {
 		return serial;
 	}
 
-	public Date getDueDate() {
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
 
@@ -97,5 +99,25 @@ public class Bankslip {
 	
 	public void cancel() {
 		this.status = SlipStatus.CANCELED;
+	}
+	
+	public BigDecimal getFine() {
+		if (dueDate.isAfter(LocalDate.now())) {
+			
+			LocalDate.now().minusDays(dueDate.getLong(ChronoField.DAY_OF_MONTH));
+						
+			totalInCents.multiply(0.005);
+		}
+		
+		return BigDecimal.ZERO;
+	}
+	
+	private BigDecimal calculateFine() {
+		
+	}
+	
+	private enum Fine {
+		UNTIL_10_DAYS(10, 0.005),
+		OVER_10_DAYS()
 	}
 }

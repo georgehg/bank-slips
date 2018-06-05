@@ -5,8 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -18,7 +17,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import br.com.conta.bankslips.exceptions.BankslipValidationException;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -57,15 +55,11 @@ public class Bankslip {
 		this.status = status;
 	}
 	
-	public static Bankslip of(LocalDate dueDate, BigDecimal totalInCents, String customer, SlipStatus status) throws BankslipValidationException {
-		try {
-			checkNotNull(dueDate, "Field due_date can not be null");
-			checkNotNull(totalInCents, "Field total_in_cents can not be null");
-			checkNotNull(customer, "Field customer can not be null");
-			checkArgument(!customer.isEmpty(), "Field customer can not be empty");
-		} catch (Exception e) {
-			throw new BankslipValidationException(e.getMessage());
-		}
+	public static Bankslip of(LocalDate dueDate, BigDecimal totalInCents, String customer, SlipStatus status) {
+		checkNotNull(dueDate, "Field due_date can not be null");
+		checkNotNull(totalInCents, "Field total_in_cents can not be null");
+		checkNotNull(customer, "Field customer can not be null");
+		checkArgument(!customer.isEmpty(), "Field customer can not be empty");
 		return new Bankslip(dueDate, totalInCents, customer, status);
 	}
 
@@ -102,22 +96,10 @@ public class Bankslip {
 	}
 	
 	public BigDecimal getFine() {
-		if (dueDate.isAfter(LocalDate.now())) {
-			
-			LocalDate.now().minusDays(dueDate.getLong(ChronoField.DAY_OF_MONTH));
-						
-			totalInCents.multiply(0.005);
+		if (dueDate.isBefore(LocalDate.now())) {
+			Long daysDiff = dueDate.until(LocalDate.now(), ChronoUnit.DAYS);
+			return Fine.from(daysDiff.intValue()).calculateFine(totalInCents);
 		}
-		
 		return BigDecimal.ZERO;
-	}
-	
-	private BigDecimal calculateFine() {
-		
-	}
-	
-	private enum Fine {
-		UNTIL_10_DAYS(10, 0.005),
-		OVER_10_DAYS()
 	}
 }

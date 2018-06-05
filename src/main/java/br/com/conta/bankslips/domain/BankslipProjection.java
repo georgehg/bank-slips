@@ -1,8 +1,10 @@
 package br.com.conta.bankslips.domain;
 
-import java.util.Date;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface BankslipProjection {
 	
@@ -10,10 +12,11 @@ public interface BankslipProjection {
 	String getSerial();
 	
 	@JsonProperty("due_date")
-	Date getDueDate();
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	LocalDate getDueDate();
 	
 	@JsonProperty("total_in_cents")
-	String getTotalInCents();
+	BigDecimal getTotalInCents();
 	
 	String getCustomer();
 

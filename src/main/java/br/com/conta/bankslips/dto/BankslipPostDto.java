@@ -1,29 +1,31 @@
 package br.com.conta.bankslips.dto;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Value;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Value;
-
 @Value
+@AllArgsConstructor
 public class BankslipPostDto {
-	
+
 	@NotNull
 	@JsonProperty("due_date")
-	private Date dueDate;
-	
+	private String dueDate;
+
 	@NotNull
 	@JsonProperty("total_in_cents")
-	private BigDecimal totalInCents;
-	
+	private String totalInCents;
+
 	@NotNull
 	private String customer;
-	
+
 	@NotNull
 	private String status;
 
+	protected BankslipPostDto() {
+		this(null, null, null, null);
+	}
 }

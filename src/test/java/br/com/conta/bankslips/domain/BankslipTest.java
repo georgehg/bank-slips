@@ -8,15 +8,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import br.com.conta.bankslips.exceptions.BankslipValidationException;
 
-@RunWith(SpringRunner.class)
 public class BankslipTest {
 	
-	private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Test
 	public void shouldInstantiateBankSlip() throws ParseException, BankslipValidationException {

@@ -8,24 +8,30 @@ import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Table;
 
 import br.com.conta.bankslips.exceptions.BankslipValidationException;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString
+@EqualsAndHashCode(of = "serial")
+@Entity
+@Table(name = "bank_slip")
 public class Bankslip {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private Long id;
 	
-	@NotNull
+	private final UUID serial;
+	
 	@Column(name = "due_date")
 	private final Date dueDate;
 	
@@ -42,6 +48,7 @@ public class Bankslip {
 	}
 
 	private Bankslip(Date dueDate, BigDecimal totalInCents, String customer, SlipStatus status) {
+		this.serial = UUID.randomUUID();
 		this.dueDate = dueDate;
 		this.totalInCents = totalInCents;
 		this.customer = customer;
@@ -60,8 +67,12 @@ public class Bankslip {
 		return new Bankslip(dueDate, totalInCents, customer, status);
 	}
 
-	public UUID getId() {
+	public Long getId() {
 		return id;
+	}
+	
+	public UUID getSerial() {
+		return serial;
 	}
 
 	public Date getDueDate() {

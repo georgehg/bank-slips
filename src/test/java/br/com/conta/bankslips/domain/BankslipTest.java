@@ -60,13 +60,13 @@ public class BankslipTest {
     @Test
     public void shoulCalculateFine_5DaysElapse() throws Exception {
         Bankslip banckSlip = Bankslip.of(LocalDate.now().minus(5, ChronoUnit.DAYS), BigDecimal.valueOf(100000), "Zaphod Company", SlipStatus.PENDING);
-        assertThat(banckSlip.getFine()).isEqualByComparingTo(BigDecimal.valueOf(2500));
+        assertThat(banckSlip.getFine()).isEqualTo(BigDecimal.valueOf(2500));
     }
 
 	@Test
 	public void shoulCalculateFine_20DaysElapse() throws Exception {
 		Bankslip banckSlip = Bankslip.of(LocalDate.now().minus(20, ChronoUnit.DAYS), BigDecimal.valueOf(100000), "Zaphod Company", SlipStatus.PENDING);
-		assertThat(banckSlip.getFine()).isEqualByComparingTo(BigDecimal.valueOf(20000));
+		assertThat(banckSlip.getFine()).isEqualTo(BigDecimal.valueOf(20000));
 	}
 	
 	@Test

@@ -12,6 +12,8 @@ public interface BankslipRepository extends JpaRepository<Bankslip, Long> {
 
 	<T> List<T> findAllBy(Class<T> projection);
 	
+	Optional<Bankslip> findBySerial(UUID serial);
+	
 	<T> Optional<T> findBySerial(UUID serial, Class<T> projection);
 
 }

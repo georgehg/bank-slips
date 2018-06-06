@@ -18,7 +18,7 @@ public class Fine {
     }
 
     public BigDecimal calculateFine(BigDecimal amount) {
-        return amount.multiply(penalty.tax).multiply(BigDecimal.valueOf(elapsed));
+        return amount.multiply(penalty.tax).multiply(BigDecimal.valueOf(elapsed, 0)).setScale(0);
     }
 
     private enum Penalty {

@@ -76,7 +76,7 @@ public class Bankslip {
 	}
 
 	public BigDecimal getTotalInCents() {
-		return totalInCents;
+		return totalInCents.setScale(0);
 	}
 
 	public String getCustomer() {
@@ -87,12 +87,14 @@ public class Bankslip {
 		return status;
 	}
 	
-	public void pay() {
+	public Bankslip pay() {
 		this.status = SlipStatus.PAID;
+		return this;
 	}
 	
-	public void cancel() {
+	public Bankslip cancel() {
 		this.status = SlipStatus.CANCELED;
+		return this;
 	}
 	
 	public BigDecimal getFine() {

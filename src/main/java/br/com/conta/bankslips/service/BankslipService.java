@@ -3,13 +3,12 @@ package br.com.conta.bankslips.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import br.com.conta.bankslips.domain.BankslipDetailProjection;
 import org.springframework.stereotype.Service;
 
 import br.com.conta.bankslips.domain.Bankslip;
+import br.com.conta.bankslips.domain.BankslipDetailProjection;
 import br.com.conta.bankslips.domain.BankslipProjection;
 import br.com.conta.bankslips.domain.SlipStatus;
 import br.com.conta.bankslips.dto.BankslipPostDto;
@@ -44,7 +43,21 @@ public class BankslipService {
 
 	public BankslipDetailProjection getDetailsBySerial(UUID serial) throws BankslipNotFoundException {
 		return bankslipRepo.findBySerial(serial, BankslipDetailProjection.class)
-				.orElseThrow(() -> new BankslipNotFoundException("Banklsip not found with serial: " + serial));
+				.orElseThrow(() -> new BankslipNotFoundException(serial.toString()));
+	}
+	
+	public void payBankslip(UUID serial) throws BankslipNotFoundException {
+		bankslipRepo.findBySerial(serial)
+					.map(bankslip -> bankslip.pay())
+					.map(bankslipRepo::save)
+					.orElseThrow(() -> new BankslipNotFoundException(serial.toString()));
+	}
+	
+	public void cancelBankslip(UUID serial) throws BankslipNotFoundException {
+		bankslipRepo.findBySerial(serial)
+					.map(bankslip -> bankslip.cancel())
+					.map(bankslipRepo::save)
+					.orElseThrow(() -> new BankslipNotFoundException(serial.toString()));
 	}
 
 

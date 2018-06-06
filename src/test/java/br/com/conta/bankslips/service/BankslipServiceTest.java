@@ -1,12 +1,13 @@
 package br.com.conta.bankslips.service;
 
-import br.com.conta.bankslips.domain.Bankslip;
-import br.com.conta.bankslips.domain.BankslipProjection;
-import br.com.conta.bankslips.domain.SlipStatus;
-import br.com.conta.bankslips.dto.BankslipPostDto;
-import br.com.conta.bankslips.exceptions.BankslipNotFoundException;
-import br.com.conta.bankslips.exceptions.BankslipValidationException;
-import br.com.conta.bankslips.repository.BankslipRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,13 +16,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import br.com.conta.bankslips.domain.Bankslip;
+import br.com.conta.bankslips.domain.BankslipProjection;
+import br.com.conta.bankslips.domain.SlipStatus;
+import br.com.conta.bankslips.dto.BankslipPostDto;
+import br.com.conta.bankslips.exceptions.BankslipNotFoundException;
+import br.com.conta.bankslips.exceptions.BankslipValidationException;
+import br.com.conta.bankslips.repository.BankslipRepository;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -40,7 +41,7 @@ public class BankslipServiceTest {
     }
 
     @Test
-    public void shouldCrateNewBankslip() throws BankslipValidationException {
+    public void shouldCreateNewBankslip() throws Exception {
         Bankslip newBankslip = service.createBankslip(new BankslipPostDto("2018-01-01", "100000", "Trillian Company", "PENDING"));
 
         Bankslip bankslip = repo.getOne(newBankslip.getId());
@@ -52,7 +53,7 @@ public class BankslipServiceTest {
     }
 
     @Test
-    public void shouldFindBankslipDetails() throws BankslipValidationException, BankslipNotFoundException {
+    public void shoulReturnBankslipDetails() throws Exception {
         Bankslip banckSlip = repo.save(Bankslip.of(LocalDate.parse("2018-02-01"), BigDecimal.valueOf(200000), "Zaphod Company", SlipStatus.PENDING));
         BankslipProjection projection = service.getDetailsBySerial(banckSlip.getSerial());
 
@@ -64,7 +65,7 @@ public class BankslipServiceTest {
     }
 
     @Test
-    public void shouldReturnBankslipList() throws BankslipValidationException, BankslipNotFoundException {
+    public void shouldReturnBankslipList() throws Exception {
         repo.save(Bankslip.of(LocalDate.parse("2018-01-01"), BigDecimal.valueOf(100000), "Trillian Company", SlipStatus.PENDING));
         repo.save(Bankslip.of(LocalDate.parse("2018-02-01"), BigDecimal.valueOf(200000), "Ford Prefect Company", SlipStatus.PENDING));
 
@@ -73,21 +74,47 @@ public class BankslipServiceTest {
         assertThat(projections).isNotEmpty();
         assertThat(projections).hasSize(2);
     }
+    
+    @Test
+    public void shouldMarkBankslipPaid()  throws Exception {
+    	Bankslip newBankslip = service.createBankslip(new BankslipPostDto("2018-01-01", "100000", "Trillian Company", "PENDING"));
+    	
+    	service.payBankslip(newBankslip.getSerial());
+    	
+    	Bankslip paidBankslip = repo.getOne(newBankslip.getId());
+    	
+        assertThat(paidBankslip.getDueDate()).isEqualTo(LocalDate.parse("2018-01-01"));
+        assertThat(paidBankslip.getCustomer()).isEqualTo("Trillian Company");
+        assertThat(paidBankslip.getTotalInCents()).isEqualTo(BigDecimal.valueOf(100000));
+        assertThat(paidBankslip.getStatus()).isEqualTo(SlipStatus.PAID);
+    }
+    
+    @Test
+    public void shouldMarkBankslipCanceled()  throws Exception {
+    	Bankslip newBankslip = service.createBankslip(new BankslipPostDto("2018-01-01", "100000", "Trillian Company", "PENDING"));
+    	
+    	service.cancelBankslip(newBankslip.getSerial());
+    	
+    	Bankslip paidBankslip = repo.getOne(newBankslip.getId());
+    	
+        assertThat(paidBankslip.getDueDate()).isEqualTo(LocalDate.parse("2018-01-01"));
+        assertThat(paidBankslip.getCustomer()).isEqualTo("Trillian Company");
+        assertThat(paidBankslip.getTotalInCents()).isEqualTo(BigDecimal.valueOf(100000));
+        assertThat(paidBankslip.getStatus()).isEqualTo(SlipStatus.CANCELED);
+    }
 
     @Test
     public void shouldIssueError_BankslipValidation_NullDueDate() {
         assertThatThrownBy(() ->
                 service.createBankslip(new BankslipPostDto(null, "100000", "Trillian Company", "PENDING")))
-                .isInstanceOf(BankslipValidationException.class)
-                .hasMessage("Field due_date can not be null");
+                .isInstanceOf(BankslipValidationException.class);
     }
 
     @Test
     public void shouldIssueError_BankslipValidation_NullTotalCents() {
         assertThatThrownBy(() ->
                 service.createBankslip(new BankslipPostDto("2018-01-01", null, "Trillian Company", "PENDING")))
-                .isInstanceOf(BankslipValidationException.class)
-                .hasMessage("Field total_in_cents can not be null");
+                .isInstanceOf(BankslipValidationException.class);
     }
 
     @Test
@@ -120,7 +147,7 @@ public class BankslipServiceTest {
         assertThatThrownBy(() ->
                 service.getDetailsBySerial(serial))
             .isInstanceOf(BankslipNotFoundException.class)
-            .hasMessage("Banklsip not found with serial: " + serial);
+            .hasMessage("Bankslip not found with the specified id: " + serial);
     }
 
 }

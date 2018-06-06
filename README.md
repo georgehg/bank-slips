@@ -4,11 +4,11 @@ Esta é uma API REST desenvolvida em Java 8 utilizando Spring Boot 2.0. Como fer
 
 A aplicação contempla os Endpoints abaixo:
 
-● Criar boleto
-● Listar boletos
-● Ver detalhes
-● Pagar um boleto
-● Cancelar um boleto
+ - Criar boleto
+ - Listar boletos
+ - Ver detalhes
+ - Pagar um boleto
+ - Cancelar um boleto
 
 	
 ## Instalação
